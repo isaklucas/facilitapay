@@ -1,209 +1,300 @@
 <template>
-  <div class="conteiner">
-    <div class="envia">
-      <input type="number" v-model="envia" placeholder="Voce Envia" />
-      <select v-model="selecionadoE">
-        <option value="BRL"> BRL</option>
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-      </select>
-    </div>
+  <div>
+    <v-app class="container">
+      <div class="enviaform">
+        <div>
+          <v-form ref="form" v-model="valid" lazy-validation>
+            <v-text-field-money
+              v-model="valorInicial"
+              label="Você Envia"
+              :properties="{
+                prefix: currency,
+                readonly: false,
+                disabled: false,
+                outlined: false,
+                clearable: true,
+                placeholder: ' ',
+              }"
+              :options="{
+                locale: 'pt-BR',
+                length: 111,
+                precision: 2,
+                empty: null,
+              }"
+            />
+          </v-form>
+        </div>
 
-    <div class="taxas">
-      <ul>
-        <span></span>
-        <li>{{ selecionadoE }} 1 = {{selecionadoR}} {{taxa}}</li>
-        <span></span>
-        <li>IOF (1.10%) = {{ selecionadoE }} {{ calculoiof }}</li>
-        <span></span>
-        <li>
-          Taxa administrativa = {{ selecionadoE }} {{ calculofx }}
-        </li>
-      </ul>
-    </div>
+        <div class="v-select-img">
+          <i v-if="select" :class="['mr-2', 'em', flag]"></i>
+          <v-select
+            class="custom"
+            v-model="select"
+            :items="countries"
+            label="Moeda Origem"
+            item-text="name"
+            item-value="name"
+            return-object
+            single-line
+            text-color="white"
+          >
+            <template v-slot:item="slotProps">
+              <i :class="['mr-2', 'em', slotProps.item.flag]"></i>
+              {{ slotProps.item.name }}
+            </template>
+          </v-select>
+        </div>
+      </div>
 
-    <div class="recebe">
-      <input
-        v-model="valorconvertido"
-        type="number"
-        placeholder="beneficiario recebe"
-      />
-      <select v-model="selecionadoR" name="MoedasR" id="MoedaR">
-        <option value="BRL">BRL</option>
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-      </select>
-    </div>
+      <div class="taxas">
+        <ul>
+          <span class="linha"></span>
+          <li>{{ selectname }} 1 = {{ selectname2 }} {{ taxa }}</li>
+          <span></span>
+          <li>IOF (1.10%) = {{ selectname }} {{ maskiof }}</li>
+          <span></span>
+          <li>Taxa administrativa = {{ selectname }} {{ maskfx }}</li>
+        </ul>
+      </div>
+
+      <div class="recebeform">
+        <div>
+          <v-form ref="form" v-model="valid" lazy-validation>
+            <v-text-field-money
+              v-model="valorconvertido"
+              label="Beneficiário Recebe"
+              :properties="{
+                prefix: currency2,
+                readonly: false,
+                disabled: false,
+                outlined: false,
+                clearable: true,
+                placeholder: ' ',
+              }"
+              :options="{
+                locale: 'pt-BR',
+                length: 111,
+                precision: 2,
+                empty: null,
+              }"
+            />
+          </v-form>
+        </div>
+
+        <div class="v-select-img">
+          <i v-if="select2" :class="['mr-2', 'em', flag2]"></i>
+          <v-select
+            v-model="select2"
+            :items="countries2"
+            label="Moeda Destino"
+            item-text="name"
+            item-value="name"
+            return-object
+            single-line
+          >
+            <template v-slot:item="slotProps">
+              <i :class="['mr-2', 'em', slotProps.item.flag]"></i>
+              {{ slotProps.item.name }}
+            </template>
+          </v-select>
+        </div>
+      </div>
+    </v-app>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
+
 export default Vue.extend({
-  
-    
-  
-  
-  data() {
+  data: () => {
     return {
       envia: 0,
-      selecionadoE: "BRL",
-      selecionadoR: "EUR",
+      valid: true,
+      valorInicial: 0,
+      select: { name: "USD", flag: "em-flag-us", value: "USD" },
+      select2: { name: "BRL", flag: "em-flag-br", value: "BRL" },
+      countries: [
+        {
+          name: "USD",
+          flag: "em-flag-us",
+          value: "USD",
+        },
+        {
+          name: "EUR",
+          flag: "em-flag-eu",
+          value: "EUR",
+        },
+        {
+          name: "BRL",
+          flag: "em-flag-br",
+          value: "BRL",
+        },
+      ],
+      countries2: [
+        {
+          name: "USD",
+          flag: "em-flag-us",
+          value: "USD",
+        },
+        {
+          name: "EUR",
+          flag: "em-flag-eu",
+          value: "EUR",
+        },
+        {
+          name: "BRL",
+          flag: "em-flag-br",
+          value: "BRL",
+        },
+      ],
     };
   },
   computed: {
-
-    calculoiof() {
-      return this.envia * 0.011;
+    selectname(): string {
+      let name = "";
+      if (this.select?.name == "BRL") name = "BRL";
+      if (this.select?.name == "EUR") name = "EUR";
+      if (this.select?.name == "USD") name = "USD";
+      return name;
     },
-    calculofx() {
-      return this.envia * 0.01;
+    selectname2(): string {
+      let name2 = "";
+      if (this.select2?.name == "BRL") name2 = "BRL";
+      if (this.select2?.name == "EUR") name2 = "EUR";
+      if (this.select2?.name == "USD") name2 = "USD";
+      return name2;
     },
-
-    taxa() {
-      if (
-        this.selecionadoE == "USD" &&
-        this.selecionadoR == "BRL"
-      ) {
+    currency(): string {
+      let valor = "";
+      if (this.select?.name == "BRL") valor = "R$";
+      if (this.select?.name == "EUR") valor = "€";
+      if (this.select?.name == "USD") valor = "$";
+      return valor;
+    },
+    flag() {
+      return this.select?.flag || "";
+    },
+    currency2(): string {
+      let valor = "";
+      if (this.select2?.name == "BRL") valor = "R$";
+      if (this.select2?.name == "EUR") valor = "€";
+      if (this.select2?.name == "USD") valor = "$";
+      return valor;
+    },
+    flag2() {
+      return this.select2?.flag || "";
+    },
+    calculoiof(): number {
+      return this.valorInicial * 0.011;
+    },
+    calculofx(): number {
+      return this.valorInicial * 0.01;
+    },
+    maskiof(): string {
+      return this.calculoiof.toLocaleString("pt-br", {
+        minimumFractionDigits: 2,
+      });
+    },
+    maskfx(): string {
+      return this.calculofx.toLocaleString("pt-br", {
+        minimumFractionDigits: 2,
+      });
+    },
+    taxa(): number {
+      if (this.select?.value == "USD" && this.select2?.value == "BRL") {
         return 5.2164;
       }
-      if (
-        this.selecionadoE == "BRL" &&
-        this.selecionadoR == "USD"
-      ) {
+      if (this.select?.value == "BRL" && this.select2?.value == "USD") {
         return 0.1917;
-      } 
-      if (
-        this.selecionadoE == "EUR" &&
-        this.selecionadoR == "BRL"
-      ) {
-        return 6.3970;
       }
-      if (
-        this.selecionadoE == "BRL" &&
-        this.selecionadoR == "EUR"
-      ) {
+      if (this.select?.value == "EUR" && this.select2?.value == "BRL") {
+        return 6.397;
+      }
+      if (this.select?.value == "BRL" && this.select2?.value == "EUR") {
         return 0.1563;
       }
-      if (
-        this.selecionadoE == "EUR" &&
-        this.selecionadoR == "USD"
-      ) {
+      if (this.select?.value == "EUR" && this.select2?.value == "USD") {
         return 1.2206;
       }
-      if (
-        this.selecionadoE == "USD" &&
-        this.selecionadoR == "EUR"
-      ) {
+      if (this.select?.value == "USD" && this.select2?.value == "EUR") {
         return 0.8192;
-      }
-      else return 1;
+      } else return 1;
     },
-
-    valorconvertido() {
-        console.log(this)
-      return (
-        (this.envia -
-          this.calculoiof -
-          this.calculofx) *
-        this.taxa
-      );
+    valorconvertido(): number {
+      return (this.valorInicial - this.calculoiof - this.calculofx) * this.taxa;
     },
   },
 });
 </script>
-
-<style lang="css">
-.conteiner {
-  width: 1280px;
-  margin: 0 auto;
+<style lang="css" scoped>
+.v-application {
+  background-color: transparent !important;
 }
 
-.envia {
-  width: 525px;
-  margin: 100px auto 0px;
-  background-color: skyblue;
-  box-shadow: 0px 1px 5px black;
+.enviaform,
+.recebeform {
+  height: 60px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 680px;
+  margin: 0 auto 30px;
+  border-radius: 10px;
+}
+
+.enviaform {
+  margin-top: 100px;
+}
+.v-form {
+  color: #fff;
+  margin-right: 20px;
+  width: 160%;
+  padding: 3px 30px 0px 3px;
+
+  border-radius: 8px;
+  box-sizing: border-box;
+
+  background-color: #fff;
+}
+.v-select-img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #7f93b7;
+
+  z-index: 10;
+  height: 74px;
+  border-radius: 0 8px 8px 0;
+  padding: 10px;
+}
+.v-select {
+  width: 130px;
+
   border-radius: 8px;
 
-  overflow: hidden;
-}
-
-.envia input {
-  height: 45px;
-  width: 400px;
-  float: left;
-}
-
-.envia select {
-  height: 45px;
-  width: 120px;
-  float: left;
+  box-sizing: border-box;
 }
 
 .taxas {
-  width: 525px;
-  margin: 0 auto;
-
-  clear: both;
-
-  color: white;
+  margin-bottom: 30px;
+  color: #fff;
+  margin: 0 auto 30px;
+  width: 540px;
 }
 
-.recebe {
-  width: 525px;
-  margin: 0 auto;
-
-  background-color: skyblue;
-  box-shadow: 0px 1px 5px black;
-
-  border-radius: 8px;
-
-  overflow: hidden;
-}
-
-.recebe input {
-  height: 45px;
-  width: 400px;
-  float: left;
-}
-
-.recebe select {
-  height: 45px;
-  width: 120px;
-  float: left;
-}
-
-input {
-  border-radius: 8px;
-  border: none;
-}
-
-select {
-  background-color: skyblue;
-  color: white;
-  border: none;
-}
-
-.flags {
-  width: 45px;
-  height: 45px;
-
-  clear: both;
-}
-
-span:before {
+.linha:before {
   content: "";
   position: absolute;
-  width: 2px;
-  height: 106px;
+  width: 3px;
+  height: 135px;
   border: 0 solid;
   border-color: inherit;
   outline: 0;
   background-color: white;
   background-size: 200% 200%;
   background-position: 0 0;
-  top: 226px;
+  top: 160px;
   margin-left: 9px;
 }
 
@@ -220,5 +311,46 @@ span {
   list-style-type: none;
   line-height: 25px;
   margin-left: 40px;
+}
+
+.v-select__selection {
+  color: #fff !important;
+}
+
+@media (max-width: 700px) {
+  .enviaform,
+  .recebeform {
+    width: 90%;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .v-form {
+    width: 137%;
+    padding-right: 150px;
+  }
+
+  .v-select-img {
+    width: 30%;
+    padding-left: 5px;
+    height: 75px;
+  }
+
+  .taxas {
+    width: 85%;
+  }
+
+  @media (max-width: 421px) {
+    .taxas {
+      width: 95%;
+    }
+  }
+
+  @media (max-width: 305px) {
+    .taxas {
+      width: 100%;
+      font-size: 0.9rem;
+    }
+  }
 }
 </style>

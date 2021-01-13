@@ -22,7 +22,6 @@ export default Vue.extend({
   color: #2c3e50;
 }
 
-
 body {
   background-image: url(assets/background.svg);
   background-size: cover;
@@ -30,6 +29,4 @@ body {
   margin: 0;
   padding: 0;
 }
-
-
 </style>
